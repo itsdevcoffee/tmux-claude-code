@@ -66,8 +66,8 @@ if [ "$notification_type" = "permission_prompt" ]; then
     fi
     tmux set-window-option -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
-    # Set blinking bright purple synthwave style (initial question state)
-    tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#b537f2,fg=#000000,bold,blink" 2>/dev/null || true
+    # Set deep violet mystery background (initial question state)
+    tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#791E94,fg=#FFFFFF,bold,blink" 2>/dev/null || true
 
     # Start 15-second timer in background to escalate if unanswered
     (
@@ -75,9 +75,9 @@ if [ "$notification_type" = "permission_prompt" ]; then
         # Check if still in question state after 15 seconds
         current_state=$(tmux show-window-option -t "$TMUX_PANE" -v @claude-state 2>/dev/null)
         if [ "$current_state" = "question" ]; then
-            # Escalate to urgent magenta synthwave background (waiting state)
+            # Escalate to laser blue cool hold (waiting state)
             tmux set-window-option -t "$TMUX_PANE" @claude-state "waiting" 2>/dev/null || true
-            tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#9C0841,fg=#FFFFFF,bold,blink" 2>/dev/null || true
+            tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#035EE8,fg=#FFFFFF,bold,blink" 2>/dev/null || true
         fi
         rm -f "$TIMER_PID_FILE" 2>/dev/null
     ) &
@@ -100,7 +100,8 @@ elif [ "$notification_type" = "idle_prompt" ]; then
     if ! tmux set-window-option -t "$TMUX_PANE" @claude-state "active" 2>/dev/null; then
         echo "Warning: Failed to set active state for pane $TMUX_PANE" >&2
     fi
-    tmux set-window-option -t "$TMUX_PANE" -u window-status-style 2>/dev/null || true
+    # Set TRON cyan neon background for active state
+    tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#2DE2E6,fg=#000000,bold" 2>/dev/null || true
 fi
 
 exit 0

@@ -19,10 +19,17 @@ tmux set-option -gq @claude-indicators-emoji-question "🔮"
 tmux set-option -gq @claude-indicators-emoji-waiting "🫦"
 tmux set-option -gq @claude-indicators-emoji-complete "✅"
 
-# Color settings
-tmux set-option -gq @claude-indicators-color-question "#b537f2"
-tmux set-option -gq @claude-indicators-color-waiting "#9C0841"
-tmux set-option -gq @claude-indicators-color-complete "#11dddd"
+# Color settings - Cyberpunk/TRON aesthetic
+tmux set-option -gq @claude-indicators-color-active-bg "#2DE2E6"      # Cyan neon
+tmux set-option -gq @claude-indicators-color-active-fg "#000000"      # Black
+tmux set-option -gq @claude-indicators-color-thinking-bg "#F706CF"    # Hot pink
+tmux set-option -gq @claude-indicators-color-thinking-fg "#FFFFFF"    # White
+tmux set-option -gq @claude-indicators-color-question-bg "#791E94"    # Deep violet
+tmux set-option -gq @claude-indicators-color-question-fg "#FFFFFF"    # White
+tmux set-option -gq @claude-indicators-color-waiting-bg "#035EE8"     # Laser blue
+tmux set-option -gq @claude-indicators-color-waiting-fg "#FFFFFF"     # White
+tmux set-option -gq @claude-indicators-color-complete-bg "#02F78E"    # Matrix green
+tmux set-option -gq @claude-indicators-color-complete-fg "#000000"    # Black
 
 # Make scripts executable
 chmod +x "$CURRENT_DIR/hooks/"*.sh

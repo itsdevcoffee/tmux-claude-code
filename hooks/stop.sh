@@ -46,8 +46,8 @@ fi
 # Set timestamp for state change
 tmux set-window-option -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
-# Flash the window (brief visual alert) - Teal synthwave
-tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#11dddd,fg=#000000,bold" 2>/dev/null || true
+# Flash the window (brief visual alert) - Matrix green hacker success
+tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#02F78E,fg=#000000,bold" 2>/dev/null || true
 
 # Reset the flash after 3 seconds (runs in background)
 # Track flash PID to allow cancellation if needed

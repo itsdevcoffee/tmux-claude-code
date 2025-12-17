@@ -35,25 +35,23 @@ if ! tmux set-window-option -t "$TMUX_PANE" @claude-state "thinking" 2>/dev/null
 fi
 tmux set-window-option -t "$TMUX_PANE" @claude-thinking-frame "😜" 2>/dev/null || true
 
-# Clear any previous styling
-tmux set-window-option -t "$TMUX_PANE" -u window-status-style 2>/dev/null || true
+# Set hot pink background for intense processing vibe
+tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#F706CF,fg=#FFFFFF,bold" 2>/dev/null || true
 
 # Kill any previous animator (CRITICAL: PreToolUse fires multiple times!)
+# NOTE: We accept brief race condition - animator self-terminates if state changes
 PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${TMUX_PANE}.pid"
+
+# Kill previous animator if it exists
 if [ -f "$PID_FILE" ]; then
-    ANIMATOR_PID=$(cat "$PID_FILE" 2>/dev/null | head -1)
-    # FIX: Use kill -0 to check if process exists
-    if [ -n "$ANIMATOR_PID" ] && kill -0 "$ANIMATOR_PID" 2>/dev/null; then
-        kill "$ANIMATOR_PID" 2>/dev/null || true
+    OLD_PID=$(cat "$PID_FILE" 2>/dev/null | head -1)
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        kill "$OLD_PID" 2>/dev/null || true
     fi
-    rm -f "$PID_FILE"
 fi
 
-# FIX: Atomic PID file creation to prevent race condition
-# Create PID file with temporary marker, then update atomically
-echo "$$" > "$PID_FILE"
+# Spawn new animator (fast, non-blocking)
 nohup "$SCRIPT_DIR/bin/claude-thinking-animator" "$TMUX_PANE" > /dev/null 2>&1 &
-ANIMATOR_PID=$!
-echo "$ANIMATOR_PID" > "$PID_FILE"
+echo $! > "$PID_FILE"
 
 exit 0

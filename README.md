@@ -33,7 +33,7 @@ Status Bar: │ 1 dotfiles 🫥  │ 2 api-server 😜  │ 3 frontend 🔮
 
 1. Add plugin to `.tmux.conf`:
    ```tmux
-   set -g @plugin 'maskkiller/tmux-claude-indicators'
+   set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
    ```
 
 2. Press `prefix + I` to install (default: `Ctrl-b I`)
@@ -44,7 +44,7 @@ Status Bar: │ 1 dotfiles 🫥  │ 2 api-server 😜  │ 3 frontend 🔮
 
 ```bash
 # Clone repository
-git clone https://github.com/maskkiller/tmux-claude-indicators ~/.tmux/plugins/tmux-claude-indicators
+git clone https://github.com/itsdevcoffee/tmux-claude-indicators ~/.tmux/plugins/tmux-claude-indicators
 
 # Run installation script
 ~/.tmux/plugins/tmux-claude-indicators/scripts/install.sh
@@ -235,7 +235,7 @@ tail -f ${TMUX_TMPDIR:-/tmp}/claude-indicators-debug.log
 ~/.tmux/plugins/tmux-claude-indicators/scripts/uninstall.sh
 
 # Remove from .tmux.conf
-# Delete this line: set -g @plugin 'maskkiller/tmux-claude-indicators'
+# Delete this line: set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
 
 # Reload tmux
 tmux source-file ~/.tmux.conf
@@ -271,7 +271,7 @@ MIT License - see [LICENSE](LICENSE) for details
 
 ## Credits
 
-Created by [maskkiller](https://github.com/maskkiller)
+Created by [Dev Coffee](https://github.com/itsdevcoffee)
 
 Inspired by the need for better visual feedback when using Claude Code in tmux.
 
@@ -289,8 +289,8 @@ Inspired by the need for better visual feedback when using Claude Code in tmux.
 
 ## Links
 
-- [GitHub Repository](https://github.com/maskkiller/tmux-claude-indicators)
-- [Issues](https://github.com/maskkiller/tmux-claude-indicators/issues)
+- [GitHub Repository](https://github.com/itsdevcoffee/tmux-claude-indicators)
+- [Issues](https://github.com/itsdevcoffee/tmux-claude-indicators/issues)
 - [Claude Code Documentation](https://code.claude.com/docs)
 - [tmux Documentation](https://github.com/tmux/tmux/wiki)
 

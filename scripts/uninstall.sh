@@ -108,7 +108,7 @@ fi
 echo -e "${GREEN}✓ Uninstall complete!${NC}"
 echo ""
 echo "To completely remove the plugin:"
-echo "  1. Remove from .tmux.conf: set -g @plugin 'maskkiller/tmux-claude-indicators'"
+echo "  1. Remove from .tmux.conf: set -g @plugin 'itsdevcoffee/tmux-claude-indicators'"
 echo "  2. Restart tmux or run: tmux source-file ~/.tmux.conf"
 echo "  3. (Optional) Remove plugin directory: ~/.tmux/plugins/tmux-claude-indicators"
 echo ""

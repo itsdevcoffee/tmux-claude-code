@@ -1,15 +1,16 @@
 #!/bin/bash
-# Enable Claude Code indicators in tmux
+# Enable Claude Code indicators in tmux - Cyberpunk theme
+# Colors embedded directly in format strings (window-status-style gets overridden by tmux2k)
 
 # Apply formats multiple times with delay to override tmux2k
 for i in {1..3}; do
-    # Non-current window format with background colors for question/waiting states
-    tmux set -g window-status-format '#{?@claude-state,#{?#{==:#{@claude-state},question},#[fg=#000000#,bg=#b537f2#,bold#,blink],#{?#{==:#{@claude-state},waiting},#[fg=#FFFFFF#,bg=#9C0841#,bold#,blink],#[fg=#5a189a]}},#[fg=#5a189a]} │ #[fg=#708080]#I #[fg=#FFFFFF]#W#{?@claude-state,#{?#{==:#{@claude-state},active}, 🫥,#{?#{==:#{@claude-state},complete}, ✅,#{?#{==:#{@claude-state},waiting}, 🫦,#{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{?#{==:#{@claude-state},question}, 🔮,}}}}},} '
+    # Non-current window format - Colors in format string
+    tmux set -g window-status-format '#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=##2DE2E6#,fg=##000000#,bold],#{?#{==:#{@claude-state},thinking},#[bg=##F706CF#,fg=##FFFFFF#,bold],#{?#{==:#{@claude-state},question},#[bg=##791E94#,fg=##FFFFFF#,bold#,blink],#{?#{==:#{@claude-state},waiting},#[bg=##035EE8#,fg=##FFFFFF#,bold#,blink],#{?#{==:#{@claude-state},complete},#[bg=##02F78E#,fg=##000000#,bold],#[bg=default#,fg=default]}}}}},#[bg=##1a0033#,fg=##b537f2#,bold]} │ #I #W#{?#{==:#{@claude-state},active}, 🫥,#{?#{==:#{@claude-state},complete}, ✅,#{?#{==:#{@claude-state},waiting}, 🫦,#{?#{==:#{@claude-state},thinking}, #{@claude-thinking-frame},#{?#{==:#{@claude-state},question}, 🔮,}}}}} '
 
-    # Current window format with background colors for question/waiting states
-    tmux set -g window-status-current-format '#{?@claude-state,#{?#{==:#{@claude-state},question},#[fg=#000000#,bg=#b537f2#,bold#,blink],#{?#{==:#{@claude-state},waiting},#[fg=#FFFFFF#,bg=#9C0841#,bold#,blink],#[fg=#b537f2]}},#[fg=#b537f2]} │ #[fg=#b537f2,bold]#I #[fg=#b537f2,bold]#W#{?@claude-state,#{?#{==:#{@claude-state},active}, 🫥,#{?#{==:#{@claude-state},complete}, ✅,#{?#{==:#{@claude-state},waiting}, 🫦,#{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{?#{==:#{@claude-state},question}, 🔮,}}}}},} '
+    # Current window format - Arrow + bold + INVERTED colors for focus
+    tmux set -g window-status-current-format '#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=##000000#,fg=##2DE2E6#,bold],#{?#{==:#{@claude-state},thinking},#[bg=##FFFFFF#,fg=##F706CF#,bold],#{?#{==:#{@claude-state},question},#[bg=##FFFFFF#,fg=##791E94#,bold#,blink],#{?#{==:#{@claude-state},waiting},#[bg=##FFFFFF#,fg=##035EE8#,bold#,blink],#{?#{==:#{@claude-state},complete},#[bg=##000000#,fg=##02F78E#,bold],#[bg=default#,fg=default]}}}}},#[bg=##b537f2#,fg=##000000#,bold]} ▶ #I #W#{?#{==:#{@claude-state},active}, 🫥,#{?#{==:#{@claude-state},complete}, ✅,#{?#{==:#{@claude-state},waiting}, 🫦,#{?#{==:#{@claude-state},thinking}, #{@claude-thinking-frame},#{?#{==:#{@claude-state},question}, 🔮,}}}}} '
 
     sleep 0.1
 done
 
-tmux display-message "Claude indicators enabled"
+tmux display-message "Claude indicators enabled - Cyberpunk theme"
