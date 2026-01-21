@@ -66,6 +66,9 @@ if [ "$notification_type" = "permission_prompt" ]; then
     fi
     tmux set-window-option -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
+    # Set emoji for question state
+    tmux set-window-option -t "$TMUX_PANE" @claude-emoji "🔮" 2>/dev/null || true
+
     # Set deep violet mystery background (initial question state)
     tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#791E94,fg=#FFFFFF,bold,blink" 2>/dev/null || true
 
@@ -77,6 +80,7 @@ if [ "$notification_type" = "permission_prompt" ]; then
         if [ "$current_state" = "question" ]; then
             # Escalate to laser blue cool hold (waiting state)
             tmux set-window-option -t "$TMUX_PANE" @claude-state "waiting" 2>/dev/null || true
+            tmux set-window-option -t "$TMUX_PANE" @claude-emoji "🫦" 2>/dev/null || true
             tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#035EE8,fg=#FFFFFF,bold,blink" 2>/dev/null || true
         fi
         rm -f "$TIMER_PID_FILE" 2>/dev/null
@@ -100,6 +104,10 @@ elif [ "$notification_type" = "idle_prompt" ]; then
     if ! tmux set-window-option -t "$TMUX_PANE" @claude-state "active" 2>/dev/null; then
         echo "Warning: Failed to set active state for pane $TMUX_PANE" >&2
     fi
+
+    # Set emoji for active state
+    tmux set-window-option -t "$TMUX_PANE" @claude-emoji "🤖" 2>/dev/null || true
+
     # Set deep purple/indigo background for active state (robot ready)
     tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#300B5F,fg=#FFFFFF,bold" 2>/dev/null || true
 fi

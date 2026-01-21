@@ -35,6 +35,8 @@ if ! tmux set-window-option -t "$TMUX_PANE" @claude-state "thinking" 2>/dev/null
 fi
 tmux set-window-option -t "$TMUX_PANE" @claude-thinking-frame "😜" 2>/dev/null || true
 
+# Don't set @claude-emoji for thinking state - format string handles it directly
+
 # Set hot pink background for intense processing vibe
 tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#F706CF,fg=#FFFFFF,bold" 2>/dev/null || true
 

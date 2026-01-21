@@ -43,6 +43,9 @@ if ! tmux set-window-option -t "$TMUX_PANE" @claude-state "complete" 2>/dev/null
     echo "Warning: Failed to set complete state for pane $TMUX_PANE" >&2
 fi
 
+# Set emoji for complete state
+tmux set-window-option -t "$TMUX_PANE" @claude-emoji "✅" 2>/dev/null || true
+
 # Set timestamp for state change
 tmux set-window-option -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
