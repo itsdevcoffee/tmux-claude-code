@@ -20,12 +20,12 @@ NC='\033[0m' # No Color
 # Logging functions
 log() {
     if [ "$QUIET" = false ]; then
-        log "$@"
+        echo "$@"
     fi
 }
 
 log_always() {
-    log "$@"
+    echo "$@"
 }
 
 log "🎨 Installing tmux-claude-code..."
