@@ -7,11 +7,9 @@ set -euo pipefail
 # Get script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Cleanup trap handler
-cleanup() {
-    [ -f "${PID_FILE:-}" ] && rm -f "$PID_FILE" 2>/dev/null || true
-}
-trap cleanup EXIT INT TERM
+# Lock and PID file paths (defined early for use throughout)
+LOCK_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${TMUX_PANE:-unknown}.lock"
+PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${TMUX_PANE:-unknown}.pid"
 
 # Check if indicators are enabled
 if [ "$(tmux show -gv @claude-indicators-enabled 2>/dev/null)" != "on" ]; then
@@ -40,19 +38,22 @@ tmux set-window-option -t "$TMUX_PANE" @claude-thinking-frame "😜" 2>/dev/null
 # Set hot pink background for intense processing vibe
 tmux set-window-option -t "$TMUX_PANE" window-status-style "bg=#F706CF,fg=#FFFFFF,bold" 2>/dev/null || true
 
-# Kill any previous animator (CRITICAL: PreToolUse fires multiple times!)
-# NOTE: We accept brief race condition - animator self-terminates if state changes
+# Update lock/PID paths now that we have TMUX_PANE
+LOCK_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${TMUX_PANE}.lock"
 PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${TMUX_PANE}.pid"
 
-# Kill previous animator if it exists
+# Kill any previous animator using SIGKILL (instant termination)
+# flock in the animator ensures only one can run, but we still clean up explicitly
 if [ -f "$PID_FILE" ]; then
     OLD_PID=$(cat "$PID_FILE" 2>/dev/null | head -1)
     if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
-        kill "$OLD_PID" 2>/dev/null || true
+        kill -9 "$OLD_PID" 2>/dev/null || true
     fi
+    rm -f "$PID_FILE"
 fi
 
-# Spawn new animator (fast, non-blocking)
+# Spawn new animator - it will acquire exclusive lock internally
+# If another animator somehow exists, the new one will exit immediately
 nohup "$SCRIPT_DIR/bin/claude-thinking-animator" "$TMUX_PANE" > /dev/null 2>&1 &
 echo $! > "$PID_FILE"
 

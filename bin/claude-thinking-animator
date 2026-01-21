@@ -1,6 +1,9 @@
 #!/bin/bash
 # Claude Code thinking animation - cycles through emojis while Claude is thinking
 # Usage: claude-thinking-animator <tmux_pane_id>
+#
+# Uses flock to ensure only ONE animator runs per pane at any time.
+# Lock is automatically released when process exits (crash-safe).
 
 PANE="${1:-$TMUX_PANE}"
 
@@ -8,6 +11,20 @@ if [ -z "$PANE" ]; then
     echo "Error: No pane specified"
     exit 1
 fi
+
+# Acquire exclusive lock - only one animator per pane allowed
+# Lock file doubles as our mutex - automatically released on exit
+LOCK_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${PANE}.lock"
+exec 200>"$LOCK_FILE"
+
+# Non-blocking exclusive lock - exit immediately if another animator holds it
+if ! flock -n 200; then
+    # Another animator is already running for this pane
+    exit 0
+fi
+
+# We now hold the exclusive lock for this pane
+# Lock will be released automatically when this process exits
 
 # Animation frames: 😜 → 🤪 → 😵‍💫 → 🤪
 FRAMES=("😜" "🤪" "😵‍💫" "🤪")
