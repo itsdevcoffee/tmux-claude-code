@@ -11,7 +11,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # Check if indicators are enabled
-if [ "$(tmux show -gv @claude-indicators-enabled 2>/dev/null)" != "on" ]; then
+if [ "$(tmux show -gv @claude-enabled 2>/dev/null)" != "on" ]; then
     cat > /dev/null  # Consume hook input
     exit 0
 fi

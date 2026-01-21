@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installation script for tmux-claude-indicators
+# Installation script for tmux-claude-code
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SETTINGS_FILE="${HOME}/.claude/settings.json"
@@ -28,7 +28,7 @@ log_always() {
     log "$@"
 }
 
-log "🎨 Installing tmux-claude-indicators..."
+log "🎨 Installing tmux-claude-code..."
 
 # Check dependencies
 if ! command -v tmux >/dev/null 2>&1; then
@@ -138,10 +138,10 @@ fi
 # Apply tmux format strings (only if in tmux)
 if [ -n "$TMUX" ]; then
     log "🎨 Applying tmux status bar formats..."
-    "$PLUGIN_DIR/bin/tmux-claude-indicators-on"
+    "$PLUGIN_DIR/bin/tmux-claude-code-on"
 
     # Enable indicators by default
-    tmux set -g @claude-indicators-enabled on
+    tmux set -g @claude-enabled on
 
     log -e "${GREEN}✓ Installation complete!${NC}"
     log ""

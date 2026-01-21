@@ -30,7 +30,7 @@
 
 ### current implementation
 
-**file:** `bin/tmux-claude-indicators-on`
+**file:** `bin/tmux-claude-code-on`
 
 uses **embedded colors in format strings** because `window-status-style` (set by hooks) doesn't work - gets overridden or ignored.
 
@@ -103,7 +103,7 @@ colors work perfectly, but mouse clicks broken on active/thinking/question/waiti
 
 ## environment details
 
-- **repo:** `/home/maskkiller/dev-coffee/repos/tmux-claude-indicators/`
+- **repo:** `/home/maskkiller/dev-coffee/repos/tmux-claude-code/`
 - **terminal:** kitty with true color support
 - **plugins:** tmux2k (currently disabled), gpakosz/.tmux
 - **tmux version:** run `tmux -V` to check
@@ -112,7 +112,7 @@ colors work perfectly, but mouse clicks broken on active/thinking/question/waiti
 ## files to investigate
 
 **primary:**
-- `bin/tmux-claude-indicators-on` - format string definitions (lines 7-11)
+- `bin/tmux-claude-code-on` - format string definitions (lines 7-11)
 
 **supporting:**
 - `hooks/*.sh` - set @claude-state and window-status-style
@@ -231,7 +231,7 @@ no claude: bg=#8B4513 (rust brown), fg=#FFE4B5 (wheat)
 ## repository context
 
 ### local development setup
-- editing files in `/home/maskkiller/dev-coffee/repos/tmux-claude-indicators/`
+- editing files in `/home/maskkiller/dev-coffee/repos/tmux-claude-code/`
 - using `run-shell` to load local version (not TPM)
 - keybindings point to local dev paths
 - changes applied via `tmux source-file ~/.tmux.conf` or `prefix + K`

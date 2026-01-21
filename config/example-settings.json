@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.tmux/plugins/tmux-claude-indicators/hooks/session-start.sh",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/session-start.sh",
             "timeout": 5000
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.tmux/plugins/tmux-claude-indicators/hooks/user-prompt.sh",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/user-prompt.sh",
             "timeout": 5000
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.tmux/plugins/tmux-claude-indicators/hooks/user-prompt.sh",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/user-prompt.sh",
             "timeout": 5000
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.tmux/plugins/tmux-claude-indicators/hooks/stop.sh",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/stop.sh",
             "timeout": 5000
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.tmux/plugins/tmux-claude-indicators/hooks/notification.sh",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/notification.sh",
             "timeout": 5000
           }
         ]

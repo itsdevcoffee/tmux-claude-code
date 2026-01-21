@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tmux-claude-indicators - Visual state indicators for Claude Code in tmux
+# tmux-claude-code - Visual state indicators for Claude Code in tmux
 # TPM plugin entry point
 
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,31 +17,31 @@ get_tmux_option() {
 }
 
 # Set default options if not already set
-tmux set-option -gq @claude-indicators-enabled "on"
-tmux set-option -gq @claude-indicators-debug "off"
+tmux set-option -gq @claude-enabled "on"
+tmux set-option -gq @claude-debug "off"
 
 # Animation settings
-tmux set-option -gq @claude-indicators-interval "160"
-tmux set-option -gq @claude-indicators-escalation "15"
+tmux set-option -gq @claude-interval "160"
+tmux set-option -gq @claude-escalation "15"
 
 # Emoji settings
-tmux set-option -gq @claude-indicators-emoji-active "🤖"
-tmux set-option -gq @claude-indicators-emoji-thinking "😜 🤪 😵‍💫"
-tmux set-option -gq @claude-indicators-emoji-question "🔮"
-tmux set-option -gq @claude-indicators-emoji-waiting "🫦"
-tmux set-option -gq @claude-indicators-emoji-complete "✅"
+tmux set-option -gq @claude-emoji-active "🤖"
+tmux set-option -gq @claude-emoji-thinking "😜 🤪 😵‍💫"
+tmux set-option -gq @claude-emoji-question "🔮"
+tmux set-option -gq @claude-emoji-waiting "🫦"
+tmux set-option -gq @claude-emoji-complete "✅"
 
 # Color settings - Cyberpunk/TRON aesthetic
-tmux set-option -gq @claude-indicators-color-active-bg "#300B5F"      # Deep purple/indigo
-tmux set-option -gq @claude-indicators-color-active-fg "#FFFFFF"      # White
-tmux set-option -gq @claude-indicators-color-thinking-bg "#F706CF"    # Hot pink
-tmux set-option -gq @claude-indicators-color-thinking-fg "#FFFFFF"    # White
-tmux set-option -gq @claude-indicators-color-question-bg "#791E94"    # Deep violet
-tmux set-option -gq @claude-indicators-color-question-fg "#FFFFFF"    # White
-tmux set-option -gq @claude-indicators-color-waiting-bg "#035EE8"     # Laser blue
-tmux set-option -gq @claude-indicators-color-waiting-fg "#FFFFFF"     # White
-tmux set-option -gq @claude-indicators-color-complete-bg "#02F78E"    # Matrix green
-tmux set-option -gq @claude-indicators-color-complete-fg "#000000"    # Black
+tmux set-option -gq @claude-color-active-bg "#300B5F"      # Deep purple/indigo
+tmux set-option -gq @claude-color-active-fg "#FFFFFF"      # White
+tmux set-option -gq @claude-color-thinking-bg "#F706CF"    # Hot pink
+tmux set-option -gq @claude-color-thinking-fg "#FFFFFF"    # White
+tmux set-option -gq @claude-color-question-bg "#791E94"    # Deep violet
+tmux set-option -gq @claude-color-question-fg "#FFFFFF"    # White
+tmux set-option -gq @claude-color-waiting-bg "#035EE8"     # Laser blue
+tmux set-option -gq @claude-color-waiting-fg "#FFFFFF"     # White
+tmux set-option -gq @claude-color-complete-bg "#02F78E"    # Matrix green
+tmux set-option -gq @claude-color-complete-fg "#000000"    # Black
 
 # Keybinding settings - Set to empty string to disable a keybinding
 tmux set-option -gq @claude-key-enable "M-K"       # Alt+Shift+K
@@ -72,12 +72,12 @@ setup_keybindings() {
 
     # Enable indicators
     if [ -n "$key_enable" ]; then
-        tmux bind-key "$key_enable" run-shell "tmux set -g @claude-indicators-enabled on && '$CURRENT_DIR/bin/tmux-claude-indicators-on'"
+        tmux bind-key "$key_enable" run-shell "tmux set -g @claude-enabled on && '$CURRENT_DIR/bin/tmux-claude-code-on'"
     fi
 
     # Disable indicators
     if [ -n "$key_disable" ]; then
-        tmux bind-key "$key_disable" run-shell "tmux set -g @claude-indicators-enabled off && '$CURRENT_DIR/bin/tmux-claude-cleanup-all' && tmux display-message 'Claude indicators disabled'"
+        tmux bind-key "$key_disable" run-shell "tmux set -g @claude-enabled off && '$CURRENT_DIR/bin/tmux-claude-code-cleanup-all' && tmux display-message 'Claude indicators disabled'"
     fi
 
     # Clear current window state
@@ -87,7 +87,7 @@ setup_keybindings() {
 
     # Clear all window states
     if [ -n "$key_clear_all" ]; then
-        tmux bind-key "$key_clear_all" run-shell "'$CURRENT_DIR/bin/tmux-claude-cleanup-all'"
+        tmux bind-key "$key_clear_all" run-shell "'$CURRENT_DIR/bin/tmux-claude-code-cleanup-all'"
     fi
 }
 

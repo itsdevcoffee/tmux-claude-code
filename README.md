@@ -1,4 +1,4 @@
-# tmux-claude-indicators
+# tmux-claude-code
 
 > Visual state indicators for Claude Code in tmux status bar
 
@@ -42,7 +42,7 @@ Current:     ▶ 4 backend ✅
 
 1. Add plugin to `.tmux.conf`:
    ```tmux
-   set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
+   set -g @plugin 'itsdevcoffee/tmux-claude-code'
    ```
 
 2. Press `prefix + I` to install (default: `Ctrl-b I`)
@@ -53,10 +53,10 @@ Current:     ▶ 4 backend ✅
 
 ```bash
 # Clone repository
-git clone https://github.com/itsdevcoffee/tmux-claude-indicators ~/.tmux/plugins/tmux-claude-indicators
+git clone https://github.com/itsdevcoffee/tmux-claude-code ~/.tmux/plugins/tmux-claude-code
 
 # Run installation script
-~/.tmux/plugins/tmux-claude-indicators/scripts/install.sh
+~/.tmux/plugins/tmux-claude-code/scripts/install.sh
 
 # Reload tmux config
 tmux source-file ~/.tmux.conf
@@ -99,7 +99,7 @@ set -g @claude-key-clear "M-c"        # Alt+C (default)
 set -g @claude-key-clear-all "M-C"    # Alt+Shift+C (default)
 
 # Load plugin (must be after customization)
-set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
+set -g @plugin 'itsdevcoffee/tmux-claude-code'
 ```
 
 **Key format guide:**
@@ -118,33 +118,33 @@ Add these to your `.tmux.conf` **before** loading the plugin to customize:
 
 ```tmux
 # Enable/disable (default: on)
-set -g @claude-indicators-enabled "on"
+set -g @claude-enabled "on"
 
 # Emoji customization
-set -g @claude-indicators-emoji-active "🤖"
-set -g @claude-indicators-emoji-thinking "😜 🤪 😵‍💫"
-set -g @claude-indicators-emoji-question "🔮"
-set -g @claude-indicators-emoji-waiting "🫦"
-set -g @claude-indicators-emoji-complete "✅"
+set -g @claude-emoji-active "🤖"
+set -g @claude-emoji-thinking "😜 🤪 😵‍💫"
+set -g @claude-emoji-question "🔮"
+set -g @claude-emoji-waiting "🫦"
+set -g @claude-emoji-complete "✅"
 
 # Color customization - Cyberpunk/TRON theme (hex codes)
-set -g @claude-indicators-color-active-bg "#300B5F"      # Deep purple
-set -g @claude-indicators-color-active-fg "#FFFFFF"      # White
-set -g @claude-indicators-color-thinking-bg "#F706CF"    # Hot pink
-set -g @claude-indicators-color-thinking-fg "#FFFFFF"    # White
-set -g @claude-indicators-color-question-bg "#791E94"    # Deep violet
-set -g @claude-indicators-color-question-fg "#FFFFFF"    # White
-set -g @claude-indicators-color-waiting-bg "#035EE8"     # Laser blue
-set -g @claude-indicators-color-waiting-fg "#FFFFFF"     # White
-set -g @claude-indicators-color-complete-bg "#02F78E"    # Matrix green
-set -g @claude-indicators-color-complete-fg "#000000"    # Black
+set -g @claude-color-active-bg "#300B5F"      # Deep purple
+set -g @claude-color-active-fg "#FFFFFF"      # White
+set -g @claude-color-thinking-bg "#F706CF"    # Hot pink
+set -g @claude-color-thinking-fg "#FFFFFF"    # White
+set -g @claude-color-question-bg "#791E94"    # Deep violet
+set -g @claude-color-question-fg "#FFFFFF"    # White
+set -g @claude-color-waiting-bg "#035EE8"     # Laser blue
+set -g @claude-color-waiting-fg "#FFFFFF"     # White
+set -g @claude-color-complete-bg "#02F78E"    # Matrix green
+set -g @claude-color-complete-fg "#000000"    # Black
 
 # Timing
-set -g @claude-indicators-interval "160"      # Animation speed (ms)
-set -g @claude-indicators-escalation "15"     # Question→waiting timeout (s)
+set -g @claude-interval "160"      # Animation speed (ms)
+set -g @claude-escalation "15"     # Question→waiting timeout (s)
 
 # Debug mode
-set -g @claude-indicators-debug "off"
+set -g @claude-debug "off"
 ```
 
 ### Integration with Other Themes
@@ -154,7 +154,7 @@ This plugin automatically overrides `window-status-format` and `window-status-cu
 To make indicators permanent, add to `.tmux.conf`:
 ```tmux
 # Apply indicators after theme loads
-run-shell '~/.tmux/plugins/tmux-claude-indicators/bin/tmux-claude-indicators-on'
+run-shell '~/.tmux/plugins/tmux-claude-code/bin/tmux-claude-code-on'
 ```
 
 ## How It Works
@@ -202,7 +202,7 @@ active
 
 1. Check if enabled:
    ```bash
-   tmux show -gv @claude-indicators-enabled
+   tmux show -gv @claude-enabled
    # Should show: on
    ```
 
@@ -235,12 +235,12 @@ rm ${TMUX_TMPDIR:-/tmp}/claude-animator-*.pid
 
 2. Re-run installation:
    ```bash
-   ~/.tmux/plugins/tmux-claude-indicators/scripts/install.sh
+   ~/.tmux/plugins/tmux-claude-code/scripts/install.sh
    ```
 
 3. Check hook script permissions:
    ```bash
-   ls -l ~/.tmux/plugins/tmux-claude-indicators/hooks/
+   ls -l ~/.tmux/plugins/tmux-claude-code/hooks/
    # Should be executable (chmod +x)
    ```
 
@@ -251,9 +251,9 @@ rm ${TMUX_TMPDIR:-/tmp}/claude-animator-*.pid
 - **Alacritty**: Requires emoji font (e.g., Noto Color Emoji)
 - **Old terminals**: May show boxes - customize with ASCII:
   ```tmux
-  set -g @claude-indicators-emoji-thinking "..."
-  set -g @claude-indicators-emoji-question "?"
-  set -g @claude-indicators-emoji-waiting "!!"
+  set -g @claude-emoji-thinking "..."
+  set -g @claude-emoji-question "?"
+  set -g @claude-emoji-waiting "!!"
   ```
 
 ### Debug mode
@@ -261,7 +261,7 @@ rm ${TMUX_TMPDIR:-/tmp}/claude-animator-*.pid
 Enable detailed logging:
 
 ```tmux
-set -g @claude-indicators-debug "on"
+set -g @claude-debug "on"
 ```
 
 Then check logs:
@@ -273,10 +273,10 @@ tail -f ${TMUX_TMPDIR:-/tmp}/claude-indicators-debug.log
 
 ```bash
 # Run uninstall script
-~/.tmux/plugins/tmux-claude-indicators/scripts/uninstall.sh
+~/.tmux/plugins/tmux-claude-code/scripts/uninstall.sh
 
 # Remove from .tmux.conf
-# Delete this line: set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
+# Delete this line: set -g @plugin 'itsdevcoffee/tmux-claude-code'
 
 # Reload tmux
 tmux source-file ~/.tmux.conf
@@ -330,8 +330,8 @@ Inspired by the need for better visual feedback when using Claude Code in tmux.
 
 ## Links
 
-- [GitHub Repository](https://github.com/itsdevcoffee/tmux-claude-indicators)
-- [Issues](https://github.com/itsdevcoffee/tmux-claude-indicators/issues)
+- [GitHub Repository](https://github.com/itsdevcoffee/tmux-claude-code)
+- [Issues](https://github.com/itsdevcoffee/tmux-claude-code/issues)
 - [Claude Code Documentation](https://code.claude.com/docs)
 - [tmux Documentation](https://github.com/tmux/tmux/wiki)
 

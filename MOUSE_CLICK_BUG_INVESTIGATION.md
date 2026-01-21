@@ -1,4 +1,4 @@
-# Mouse Click Bug Investigation - tmux-claude-indicators
+# Mouse Click Bug Investigation - tmux-claude-code
 
 ## Problem Statement
 
@@ -29,7 +29,7 @@ Window tabs become unclickable in certain Claude Code states:
 
 ### Code Analysis
 
-#### Format Strings (`bin/tmux-claude-indicators-on`)
+#### Format Strings (`bin/tmux-claude-code-on`)
 
 ```bash
 # Line 6: Non-current window format
@@ -64,7 +64,7 @@ window-status-style "bg=#02F78E,fg=#000000,bold"  # ✅ No blink
 
 ### Issue 1: Malformed Format String with Blink Attribute
 
-**Location**: `bin/tmux-claude-indicators-on:6,9`
+**Location**: `bin/tmux-claude-code-on:6,9`
 
 **Problem**: Extra `##` before `,blink` creates malformed attribute string
 
@@ -104,7 +104,7 @@ window-status-style "bg=#02F78E,fg=#000000,bold"  # ✅ No blink
 
 Remove the extra `##` before `,blink` in both format strings:
 
-**File**: `bin/tmux-claude-indicators-on`
+**File**: `bin/tmux-claude-code-on`
 
 ```bash
 # Line 6 - Fix question & waiting states:
@@ -137,7 +137,7 @@ If Solution 1 doesn't work, the blink attribute itself might be incompatible wit
 Remove `blink` from both format strings AND hook settings:
 
 ```bash
-# bin/tmux-claude-indicators-on
+# bin/tmux-claude-code-on
 ##[bg=##791e94##,fg=##ffffff##,bold]  # No blink
 ##[bg=##035ee8##,fg=##ffffff##,bold]  # No blink
 

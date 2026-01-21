@@ -1,7 +1,7 @@
-# Release Instructions for tmux-claude-indicators v1.0.1
+# Release Instructions for tmux-claude-code v1.0.1
 
 ## Context
-This is the tmux-claude-indicators plugin - production-ready after fixing all critical bugs from a comprehensive audit.
+This is the tmux-claude-code plugin - production-ready after fixing all critical bugs from a comprehensive audit.
 
 **Current Status:**
 - ✅ All code fixes completed and committed
@@ -17,7 +17,7 @@ Use the GitHub CLI to create the release:
 gh release create v1.0.1 \
   --title "v1.0.1 - Production Ready Release" \
   --notes "$(cat <<'EOF'
-## 🎉 tmux-claude-indicators v1.0.1
+## 🎉 tmux-claude-code v1.0.1
 
 Production-ready release with all critical bug fixes from comprehensive security audit.
 
@@ -39,7 +39,7 @@ Production-ready release with all critical bug fixes from comprehensive security
 
 Via TPM (recommended):
 \`\`\`tmux
-set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
+set -g @plugin 'itsdevcoffee/tmux-claude-code'
 \`\`\`
 
 Then press \`prefix + I\` to install.
@@ -54,7 +54,7 @@ Then press \`prefix + I\` to install.
 
 ### 📚 Documentation
 
-See [README.md](https://github.com/itsdevcoffee/tmux-claude-indicators/blob/main/README.md) for full documentation.
+See [README.md](https://github.com/itsdevcoffee/tmux-claude-code/blob/main/README.md) for full documentation.
 
 ### 🙏 Credits
 
@@ -65,7 +65,7 @@ EOF
 
 **If gh CLI has permission issues:**
 - Run: `gh auth refresh -h github.com -s workflow`
-- Or create release manually at: https://github.com/itsdevcoffee/tmux-claude-indicators/releases/new
+- Or create release manually at: https://github.com/itsdevcoffee/tmux-claude-code/releases/new
 
 ## Task 2: Test TPM Installation
 
@@ -74,7 +74,7 @@ EOF
 Add this line to `~/.tmux.conf` or `~/.tmux.conf.local`:
 
 ```tmux
-set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
+set -g @plugin 'itsdevcoffee/tmux-claude-code'
 ```
 
 ### Step 2: Install via TPM
@@ -92,7 +92,7 @@ set -g @plugin 'itsdevcoffee/tmux-claude-indicators'
 Check that files were installed:
 
 ```bash
-ls -la ~/.tmux/plugins/tmux-claude-indicators/
+ls -la ~/.tmux/plugins/tmux-claude-code/
 ```
 
 Should see:
@@ -167,7 +167,7 @@ tmux show -gv @claude-indicators-enabled
 
 # Enable manually
 tmux set -g @claude-indicators-enabled on
-~/.tmux/plugins/tmux-claude-indicators/bin/tmux-claude-indicators-on
+~/.tmux/plugins/tmux-claude-code/bin/tmux-claude-code-on
 ```
 
 **Multiple animators running:**
@@ -183,7 +183,7 @@ rm ${TMUX_TMPDIR:-/tmp}/claude-animator-*.pid
 ## Verification Checklist
 
 After testing, verify:
-- [ ] GitHub release exists at https://github.com/itsdevcoffee/tmux-claude-indicators/releases
+- [ ] GitHub release exists at https://github.com/itsdevcoffee/tmux-claude-code/releases
 - [ ] Release shows v1.0.1 tag
 - [ ] Release notes are complete
 - [ ] TPM installation works

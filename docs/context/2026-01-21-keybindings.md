@@ -15,11 +15,11 @@ The plugin now **automatically configures keybindings** - users don't need to ma
 
 ## How It Works
 
-The plugin file (`claude-indicators.tmux`) automatically sets up keybindings using `$CURRENT_DIR` to reference scripts without hardcoded paths:
+The plugin file (`claude-code.tmux`) automatically sets up keybindings using `$CURRENT_DIR` to reference scripts without hardcoded paths:
 
 ```bash
-# In claude-indicators.tmux
-tmux bind-key "M-K" run-shell "tmux set -g @claude-indicators-enabled on && '$CURRENT_DIR/bin/tmux-claude-indicators-on'"
+# In claude-code.tmux
+tmux bind-key "M-K" run-shell "tmux set -g @claude-enabled on && '$CURRENT_DIR/bin/tmux-claude-code-on'"
 ```
 
 This eliminates the need for users to add long keybinding commands with hardcoded paths to their `.tmux.conf`.
@@ -54,7 +54,7 @@ set -g @claude-key-clear ""           # Disable clear current window
 
 Disabling and re-enabling would output ~20 lines:
 ```
-🎨 Installing tmux-claude-indicators...
+🎨 Installing tmux-claude-code...
 ⚠ Warning: Claude Code (clod) not found...
 📦 Backing up existing settings...
 🔗 Injecting Claude Code hooks...

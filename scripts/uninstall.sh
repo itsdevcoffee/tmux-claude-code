@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Uninstall script for tmux-claude-indicators
+# Uninstall script for tmux-claude-code
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SETTINGS_FILE="${HOME}/.claude/settings.json"
@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo "🗑️  Uninstalling tmux-claude-indicators..."
+echo "🗑️  Uninstalling tmux-claude-code..."
 
 # Kill all background processes
 echo "🔪 Stopping background processes..."
@@ -35,10 +35,10 @@ if [ -n "$TMUX" ]; then
     done
 
     # Remove global options
-    tmux set -gu @claude-indicators-enabled 2>/dev/null
-    tmux set -gu @claude-indicators-debug 2>/dev/null
-    tmux set -gu @claude-indicators-interval 2>/dev/null
-    tmux set -gu @claude-indicators-escalation 2>/dev/null
+    tmux set -gu @claude-enabled 2>/dev/null
+    tmux set -gu @claude-debug 2>/dev/null
+    tmux set -gu @claude-interval 2>/dev/null
+    tmux set -gu @claude-escalation 2>/dev/null
 
     # Reload tmux config to restore original formats
     echo "🔄 Reloading tmux configuration..."
@@ -108,9 +108,9 @@ fi
 echo -e "${GREEN}✓ Uninstall complete!${NC}"
 echo ""
 echo "To completely remove the plugin:"
-echo "  1. Remove from .tmux.conf: set -g @plugin 'itsdevcoffee/tmux-claude-indicators'"
+echo "  1. Remove from .tmux.conf: set -g @plugin 'itsdevcoffee/tmux-claude-code'"
 echo "  2. Restart tmux or run: tmux source-file ~/.tmux.conf"
-echo "  3. (Optional) Remove plugin directory: ~/.tmux/plugins/tmux-claude-indicators"
+echo "  3. (Optional) Remove plugin directory: ~/.tmux/plugins/tmux-claude-code"
 echo ""
 echo "Backups saved:"
 echo "  Settings: $BACKUP"
