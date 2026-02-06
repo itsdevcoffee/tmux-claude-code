@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
 # Enable Claude Code indicators in tmux - Cyberpunk theme
-# Uses ##HEX## pattern for hex codes inside conditionals
+# FIX: Use colour256 indices (not hex) to avoid # parsing issues in nested conditionals
+# FIX: Use separate style tokens (not comma-separated) for reliable conditional parsing
+# FIX: Use push-default/pop-default for clean style management
+#
+# colour256 mapping (matches hooks):
+#   active:   colour54  (bg=#300B5F), colour255 (fg=#FFFFFF)
+#   thinking: colour200 (bg=#F706CF), colour255 (fg=#FFFFFF)
+#   question: colour128 (bg=#791E94), colour255 (fg=#FFFFFF)
+#   waiting:  colour33  (bg=#035EE8), colour255 (fg=#FFFFFF)
+#   complete: colour48  (bg=#02F78E), colour232 (fg=#000000)
+#   no-claude: colour130 (bg=#8B4513), colour223 (fg=#FFE4B5)
+#   current-fg: colour208 (#FF8C42)
 
-# Non-current window format - Conditional colors based on @claude-state
-tmux set -g window-status-format '#{?@claude-state,#{?#{==:#{@claude-state},active},##[bg=##300b5f##,fg=##ffffff##,bold],#{?#{==:#{@claude-state},thinking},##[bg=##f706cf##,fg=##ffffff##,bold],#{?#{==:#{@claude-state},question},##[bg=##791e94##,fg=##ffffff##,bold,blink],#{?#{==:#{@claude-state},waiting},##[bg=##035ee8##,fg=##ffffff##,bold,blink],#{?#{==:#{@claude-state},complete},##[bg=##02f78e##,fg=##000000##,bold],##[bg=##8b4513##,fg=##ffe4b5##,bold]}}}}},##[bg=##8b4513##,fg=##ffe4b5##,bold]} │ #I #W #{@claude-emoji}'
+# Non-current window format - Colored backgrounds based on @claude-state
+tmux set -g window-status-format '#[push-default]#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=colour54]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},thinking},#[bg=colour200]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},question},#[bg=colour128]#[fg=colour255]#[bold]#[blink],#{?#{==:#{@claude-state},waiting},#[bg=colour33]#[fg=colour255]#[bold]#[blink],#{?#{==:#{@claude-state},complete},#[bg=colour48]#[fg=colour232]#[bold],#[bg=colour130]#[fg=colour223]#[bold]}}}}},#[bg=colour130]#[fg=colour223]#[bold]} │ #I #W #{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{@claude-emoji}}#[pop-default]'
 
 # Current window format - Arrow + colored foreground text + transparent background
-tmux set -g window-status-current-format '#{?@claude-state,#{?#{==:#{@claude-state},active},##[bg=terminal##,fg=##ffffff##,bold],#{?#{==:#{@claude-state},thinking},##[bg=terminal##,fg=##f706cf##,bold],#{?#{==:#{@claude-state},question},##[bg=terminal##,fg=##791e94##,bold,blink],#{?#{==:#{@claude-state},waiting},##[bg=terminal##,fg=##035ee8##,bold,blink],#{?#{==:#{@claude-state},complete},##[bg=terminal##,fg=##02f78e##,bold],##[bg=terminal##,fg=##ff8c42##,bold]}}}}},##[bg=terminal##,fg=##ff8c42##,bold]} ▶ #I #W #{@claude-emoji}'
+tmux set -g window-status-current-format '#[push-default]#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=terminal]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},thinking},#[bg=terminal]#[fg=colour200]#[bold],#{?#{==:#{@claude-state},question},#[bg=terminal]#[fg=colour128]#[bold]#[blink],#{?#{==:#{@claude-state},waiting},#[bg=terminal]#[fg=colour33]#[bold]#[blink],#{?#{==:#{@claude-state},complete},#[bg=terminal]#[fg=colour48]#[bold],#[bg=terminal]#[fg=colour208]#[bold]}}}}},#[bg=terminal]#[fg=colour208]#[bold]} ▶ #I #W #{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{@claude-emoji}}#[pop-default]'
 
 tmux display-message "Claude indicators enabled - Cyberpunk theme"

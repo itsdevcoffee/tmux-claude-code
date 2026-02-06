@@ -26,7 +26,7 @@ tmux set-option -gq @claude-escalation "15"
 
 # Emoji settings
 tmux set-option -gq @claude-emoji-active "🤖"
-tmux set-option -gq @claude-emoji-thinking "😜 🤪 😵‍💫"
+tmux set-option -gq @claude-emoji-thinking "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
 tmux set-option -gq @claude-emoji-question "🔮"
 tmux set-option -gq @claude-emoji-waiting "🫦"
 tmux set-option -gq @claude-emoji-complete "✅"

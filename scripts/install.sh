@@ -155,7 +155,7 @@ if [ -n "$TMUX" ]; then
     log ""
     log "States:"
     log "  🤖  Active (waiting for input)"
-    log "  😜🤪😵‍💫  Thinking (animated)"
+    log "  ⠋⠙⠹⠸  Thinking (braille spinner)"
     log "  🔮  Question (needs permission)"
     log "  🫦  Waiting (question unanswered >15s)"
     log "  ✅  Complete (task finished)"

@@ -9,7 +9,7 @@ Never miss when Claude is thinking, waiting for permission, or needs your attent
 **Cyberpunk/TRON-inspired theme with vibrant state indicators:**
 
 - **🤖 Active** - Claude ready to work (deep purple #300B5F)
-- **😜🤪😵‍💫 Thinking** - Animated while processing (hot pink #F706CF)
+- **⠋⠙⠹⠸ Thinking** - Braille spinner while processing (hot pink #F706CF)
 - **🔮 Question** - Needs permission (deep violet #791E94, blinks)
 - **🫦 Waiting** - Question unanswered >15s (laser blue #035EE8, blinks)
 - **✅ Complete** - Task finished (matrix green #02F78E flash, 3s)
@@ -22,7 +22,7 @@ Never miss when Claude is thinking, waiting for permission, or needs your attent
 ## Preview
 
 ```
-Non-current: │ 1 dotfiles 🤖  │ 2 api 😜  │ 3 frontend 🔮
+Non-current: │ 1 dotfiles 🤖  │ 2 api ⠹  │ 3 frontend 🔮
               ▼ colored bg     ▼ pink bg   ▼ violet bg
 
 Current:     ▶ 4 backend ✅
@@ -70,7 +70,7 @@ After installation, keybindings are **automatically configured**:
 
 1. **Start Claude Code** in a tmux window
 2. **Submit a prompt** and watch the status bar change:
-   - 🤖 (deep purple) → 😜 (hot pink, animated) → ✅ (matrix green flash)
+   - 🤖 (deep purple) → ⠹ (hot pink, animated) → ✅ (matrix green flash)
 
 The plugin is enabled by default. Use the keybindings below to control it.
 
@@ -122,7 +122,7 @@ set -g @claude-enabled "on"
 
 # Emoji customization
 set -g @claude-emoji-active "🤖"
-set -g @claude-emoji-thinking "😜 🤪 😵‍💫"
+set -g @claude-emoji-thinking "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
 set -g @claude-emoji-question "🔮"
 set -g @claude-emoji-waiting "🫦"
 set -g @claude-emoji-complete "✅"
@@ -183,7 +183,7 @@ run-shell '~/.tmux/plugins/tmux-claude-code/bin/tmux-claude-code-on'
 ```
 active (🤖, deep purple #300B5F)
   ↓ UserPromptSubmit
-thinking (😜🤪😵‍💫 animated, hot pink #F706CF)
+thinking (⠋⠙⠹⠸ braille spinner, hot pink #F706CF)
   ↓ Notification:permission_prompt
 question (🔮, deep violet #791E94, blinks)
   ↓ [15s timeout]

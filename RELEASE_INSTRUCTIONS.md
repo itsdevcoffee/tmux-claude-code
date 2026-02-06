@@ -47,7 +47,7 @@ Then press \`prefix + I\` to install.
 ### 🎨 Features
 
 - **🫥 Active** - Claude idle, ready for input
-- **😜🤪😵‍💫 Thinking** - Animated while processing
+- **⠋⠙⠹⠸ Thinking** - Braille spinner while processing
 - **🔮 Question** - Needs permission (purple background)
 - **🫦 Waiting** - Question unanswered >15s (magenta background)
 - **✅ Complete** - Task finished (teal flash)

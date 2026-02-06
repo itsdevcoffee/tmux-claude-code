@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code thinking animation - cycles through emojis while Claude is thinking
+# Claude Code thinking animation - cycles through frames while Claude is thinking
 # Usage: claude-thinking-animator <tmux_pane_id>
 #
 # Uses flock to ensure only ONE animator runs per pane at any time.
@@ -30,8 +30,17 @@ fi
 
 # We now hold the exclusive lock for this pane
 
-# Animation frames: 😜 → 🤪 → 😵‍💫 → 🤪
-FRAMES=("😜" "🤪" "😵‍💫" "🤪")
+# Read animation frames from tmux option, fallback to braille spinner
+# Braille characters are all single-width and identical size - no layout bounce
+EMOJI_OPTION=$(tmux show-option -gqv @claude-emoji-thinking 2>/dev/null)
+
+if [ -n "$EMOJI_OPTION" ]; then
+    # Split space-separated emoji string into array
+    IFS=' ' read -ra FRAMES <<< "$EMOJI_OPTION"
+else
+    FRAMES=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+fi
+
 FRAME_COUNT=${#FRAMES[@]}
 FRAME_INDEX=0
 
@@ -48,7 +57,7 @@ while true; do
         exit 0
     fi
 
-    # Update the emoji in @claude-thinking-frame
+    # Update the frame in @claude-thinking-frame
     tmux set-window-option -t "$PANE" @claude-thinking-frame "${FRAMES[$FRAME_INDEX]}"
 
     # Move to next frame
