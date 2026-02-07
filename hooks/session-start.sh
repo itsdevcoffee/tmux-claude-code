@@ -32,6 +32,7 @@ cat > /dev/null
 # Set per-pane state (pane option, survives aggregation)
 tmux set-option -p -t "$TMUX_PANE" @claude-pane-state "active" 2>/dev/null || true
 tmux set-option -p -t "$TMUX_PANE" @claude-pane-emoji "🤖" 2>/dev/null || true
+tmux set-option -p -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
 # Aggregate all panes and update window display
 "$SCRIPT_DIR/bin/claude-aggregate-state" "$TMUX_PANE"

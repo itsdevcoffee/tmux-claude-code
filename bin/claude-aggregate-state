@@ -40,8 +40,9 @@ worst_priority=99
 worst_state=""
 worst_emoji=""
 has_thinking=false
+latest_timestamp=0
 
-while IFS='|' read -r pane_id pane_state pane_emoji pane_cmd; do
+while IFS='|' read -r pane_id pane_state pane_emoji pane_timestamp pane_cmd; do
     [ -z "$pane_state" ] && continue
 
     # Detect stale pane state: if the pane's current command is a shell,
@@ -66,8 +67,13 @@ while IFS='|' read -r pane_id pane_state pane_emoji pane_cmd; do
         worst_state="$pane_state"
         worst_emoji="$pane_emoji"
     fi
+
+    # Track latest timestamp across all panes
+    if [ -n "$pane_timestamp" ] && [ "$pane_timestamp" -gt "$latest_timestamp" ] 2>/dev/null; then
+        latest_timestamp="$pane_timestamp"
+    fi
 done < <(tmux list-panes -t "$WINDOW" \
-    -F '#{pane_id}|#{@claude-pane-state}|#{@claude-pane-emoji}|#{pane_current_command}' 2>/dev/null)
+    -F '#{pane_id}|#{@claude-pane-state}|#{@claude-pane-emoji}|#{@claude-timestamp}|#{pane_current_command}' 2>/dev/null)
 
 # If no Claude panes found, clear window state
 if [ "$count" -eq 0 ]; then
@@ -81,6 +87,11 @@ fi
 # Set window-level display variables
 tmux set-window-option -t "$WINDOW" @claude-state "$worst_state" 2>/dev/null || true
 tmux set-window-option -t "$WINDOW" @claude-count "$count" 2>/dev/null || true
+
+# Set window-level timestamp (latest across all panes, for stale detection)
+if [ "$latest_timestamp" -gt 0 ] 2>/dev/null; then
+    tmux set-window-option -t "$WINDOW" @claude-timestamp "$latest_timestamp" 2>/dev/null || true
+fi
 
 # For thinking state, the emoji comes from @claude-thinking-frame (animated)
 # For other states, set the emoji from the worst-state pane

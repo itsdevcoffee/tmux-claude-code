@@ -7,20 +7,28 @@ set -euo pipefail
 # Determine tmpdir
 TMPDIR="${TMUX_TMPDIR:-/tmp}"
 
+# Helper: kill process from PID file and remove file
+kill_pid_file() {
+    local pid_file="$1"
+    [ -f "$pid_file" ] || return 0
+    local pid=$(cat "$pid_file" 2>/dev/null | head -1)
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && kill "$pid" 2>/dev/null || true
+    rm -f "$pid_file"
+}
+
 # Kill all background processes by PID files
 for pid_file in "${TMPDIR}"/claude-{animator,timer,flash}-*.pid; do
-    # Check if glob matched any files (avoid error if no files exist)
     [ -e "$pid_file" ] || continue
-
-    PID=$(cat "$pid_file" 2>/dev/null | head -1)
-    # Kill process if it exists, then remove PID file
-    [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null && kill "$PID" 2>/dev/null || true
-    rm -f "$pid_file"
+    kill_pid_file "$pid_file"
 done
 
-# Kill any orphaned animator processes (fallback)
+# Kill stale detector (global process)
+kill_pid_file "${TMPDIR}/claude-stale-detector.pid"
+
+# Kill any orphaned animator/detector processes (fallback)
 # More specific pattern to avoid killing unrelated processes
 pkill -f "bin/claude-thinking-animator" 2>/dev/null || true
+pkill -f "bin/claude-stale-detector" 2>/dev/null || true
 
 # Clear tmux state for all windows and panes in current session
 if [ -n "${TMUX:-}" ]; then
@@ -28,6 +36,7 @@ if [ -n "${TMUX:-}" ]; then
     for pane_id in $(tmux list-panes -a -F "#{pane_id}" 2>/dev/null); do
         tmux set-option -p -t "$pane_id" -u @claude-pane-state 2>/dev/null || true
         tmux set-option -p -t "$pane_id" -u @claude-pane-emoji 2>/dev/null || true
+        tmux set-option -p -t "$pane_id" -u @claude-timestamp 2>/dev/null || true
     done
 
     # Clean up window-level options for all windows

@@ -62,6 +62,7 @@ fi
 # Clear pane-level state (Claude is gone from this pane)
 tmux set-option -p -t "$TMUX_PANE" -u @claude-pane-state 2>/dev/null || true
 tmux set-option -p -t "$TMUX_PANE" -u @claude-pane-emoji 2>/dev/null || true
+tmux set-option -p -t "$TMUX_PANE" -u @claude-timestamp 2>/dev/null || true
 
 # Clear thinking frame
 tmux set-window-option -t "$TMUX_PANE" -u @claude-thinking-frame 2>/dev/null || true

@@ -30,6 +30,12 @@ tmux set-option -gq @claude-emoji-thinking "⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ 
 tmux set-option -gq @claude-emoji-question "🔮"
 tmux set-option -gq @claude-emoji-waiting "🫦"
 tmux set-option -gq @claude-emoji-complete "✅"
+tmux set-option -gq @claude-emoji-ended "💀"
+tmux set-option -gq @claude-emoji-stale "⏳"
+
+# Stale detection settings
+tmux set-option -gq @claude-stale-timeout "300"
+tmux set-option -gq @claude-stale-interval "30"
 
 # Color settings - Cyberpunk/TRON aesthetic
 tmux set-option -gq @claude-color-active-bg "#300B5F"      # Deep purple/indigo

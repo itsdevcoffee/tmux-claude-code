@@ -26,6 +26,7 @@ cat > /dev/null
 # Set per-pane state (pane option, survives aggregation)
 tmux set-option -p -t "$TMUX_PANE" @claude-pane-state "thinking" 2>/dev/null || true
 tmux set-option -p -t "$TMUX_PANE" @claude-pane-emoji "⠹" 2>/dev/null || true
+tmux set-option -p -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
 # Aggregate all panes and update window display
 "$SCRIPT_DIR/bin/claude-aggregate-state" "$TMUX_PANE"
@@ -43,37 +44,19 @@ if [ "$NEEDS_ANIMATOR" = "on" ]; then
     # Define PID path for window-level animator
     PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${WINDOW}.pid"
 
-    # Kill any previous animator gracefully, then force if needed
+    # Kill any previous animator (flock mechanism will prevent conflicts)
     if [ -f "$PID_FILE" ]; then
         OLD_PID=$(cat "$PID_FILE" 2>/dev/null | head -1)
         if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
-            # Try graceful SIGTERM first (allows clean lock release)
             kill "$OLD_PID" 2>/dev/null || true
-            # Wait for termination (up to 100ms), then force kill if needed
-            for _ in {1..10}; do
-                kill -0 "$OLD_PID" 2>/dev/null || break
-                sleep 0.01
-            done
-            kill -9 "$OLD_PID" 2>/dev/null || true
         fi
         rm -f "$PID_FILE"
     fi
 
-    # Verify animator script exists before spawning
+    # Spawn new animator - it will acquire exclusive lock internally
     ANIMATOR_SCRIPT="$SCRIPT_DIR/bin/claude-thinking-animator"
-    if [ ! -x "$ANIMATOR_SCRIPT" ]; then
-        echo "Error: Animator script not found or not executable: $ANIMATOR_SCRIPT" >&2
-        exit 1
-    fi
-
-    # Spawn new animator - pass window ID instead of pane ID
-    # It will acquire exclusive lock internally
     nohup "$ANIMATOR_SCRIPT" "$WINDOW" > /dev/null 2>&1 &
-    NEW_PID=$!
-
-    # Atomic PID file write using temp file + rename
-    echo "$NEW_PID" > "${PID_FILE}.tmp"
-    mv -f "${PID_FILE}.tmp" "$PID_FILE"
+    echo $! > "$PID_FILE"
 
     # Clear the flag
     tmux set-window-option -t "$WINDOW" -u @claude-needs-animator 2>/dev/null || true

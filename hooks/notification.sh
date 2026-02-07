@@ -38,22 +38,14 @@ if [ -z "$TMUX_PANE" ]; then
     exit 0
 fi
 
+# Get script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # Read hook input (JSON from Claude Code)
 hook_input=$(cat)
 
-# Check notification type (no jq dependency - simple grep)
+# Handle permission_prompt as question state (no jq dependency - simple grep)
 if echo "$hook_input" | grep -q '"notification_type":"permission_prompt"'; then
-    notification_type="permission_prompt"
-elif echo "$hook_input" | grep -q '"notification_type":"idle_prompt"'; then
-    notification_type="idle_prompt"
-else
-    notification_type="unknown"
-fi
-
-# Handle permission_prompt as question state
-if [ "$notification_type" = "permission_prompt" ]; then
-    # Get script directory for relative paths
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
     # Get window ID for animator cleanup
     WINDOW=$(tmux display-message -t "$TMUX_PANE" -p '#{window_id}' 2>/dev/null) || exit 1
@@ -73,12 +65,10 @@ if [ "$notification_type" = "permission_prompt" ]; then
     # Set per-pane state (pane option, survives aggregation)
     tmux set-option -p -t "$TMUX_PANE" @claude-pane-state "question" 2>/dev/null || true
     tmux set-option -p -t "$TMUX_PANE" @claude-pane-emoji "🔮" 2>/dev/null || true
+    tmux set-option -p -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
     # Aggregate all panes and update window display
     "$SCRIPT_DIR/bin/claude-aggregate-state" "$TMUX_PANE"
-
-    # Set timestamp for state change
-    tmux set-window-option -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
     # Set deep violet mystery background (initial question state)
     # Using colour256 instead of hex to avoid corrupting tmux's range declarations
@@ -93,6 +83,7 @@ if [ "$notification_type" = "permission_prompt" ]; then
             # Escalate to laser blue cool hold (waiting state)
             tmux set-option -p -t "$TMUX_PANE" @claude-pane-state "waiting" 2>/dev/null || true
             tmux set-option -p -t "$TMUX_PANE" @claude-pane-emoji "🫦" 2>/dev/null || true
+            tmux set-option -p -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
             # Re-aggregate to update window display
             "$SCRIPT_DIR/bin/claude-aggregate-state" "$TMUX_PANE"
             # Using colour256 instead of hex to avoid corrupting tmux's range declarations
@@ -103,10 +94,7 @@ if [ "$notification_type" = "permission_prompt" ]; then
     echo $! > "$TIMER_PID_FILE"
 
 # Handle idle_prompt - set to active state
-elif [ "$notification_type" = "idle_prompt" ]; then
-    # Get script directory for relative paths
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
+elif echo "$hook_input" | grep -q '"notification_type":"idle_prompt"'; then
     # Get window ID for animator cleanup
     WINDOW=$(tmux display-message -t "$TMUX_PANE" -p '#{window_id}' 2>/dev/null) || exit 1
 
@@ -117,6 +105,7 @@ elif [ "$notification_type" = "idle_prompt" ]; then
     # Set per-pane state (pane option, survives aggregation)
     tmux set-option -p -t "$TMUX_PANE" @claude-pane-state "active" 2>/dev/null || true
     tmux set-option -p -t "$TMUX_PANE" @claude-pane-emoji "🤖" 2>/dev/null || true
+    tmux set-option -p -t "$TMUX_PANE" @claude-timestamp "$(date +%s)" 2>/dev/null || true
 
     # Aggregate all panes and update window display
     "$SCRIPT_DIR/bin/claude-aggregate-state" "$TMUX_PANE"
