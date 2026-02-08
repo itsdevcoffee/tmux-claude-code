@@ -54,6 +54,17 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.tmux/plugins/tmux-claude-code/hooks/session-end.sh",
+            "timeout": 5000
+          }
+        ]
+      }
     ]
   }
 }

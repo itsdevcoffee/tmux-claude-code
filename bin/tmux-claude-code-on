@@ -15,6 +15,9 @@
 #   no-claude: colour130 (bg=#8B4513), colour223 (fg=#FFE4B5)
 #   current-fg: colour208 (#FF8C42)
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
 # Non-current window format - Colored backgrounds based on @claude-state
 tmux set -g window-status-format '#[push-default]#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=colour54]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},thinking},#[bg=colour200]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},question},#[bg=colour128]#[fg=colour255]#[bold]#[blink],#{?#{==:#{@claude-state},waiting},#[bg=colour33]#[fg=colour255]#[bold]#[blink],#{?#{==:#{@claude-state},complete},#[bg=colour48]#[fg=colour232]#[bold],#{?#{==:#{@claude-state},ended},#[bg=colour240]#[fg=colour245],#{?#{==:#{@claude-state},stale},#[bg=colour130]#[fg=colour255],#[bg=colour130]#[fg=colour223]#[bold]}}}}}}},#[bg=colour130]#[fg=colour223]#[bold]} │ #I #W #{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{@claude-emoji}}#{@claude-count-display}#[pop-default]'
 
@@ -22,15 +25,12 @@ tmux set -g window-status-format '#[push-default]#{?@claude-state,#{?#{==:#{@cla
 tmux set -g window-status-current-format '#[push-default]#{?@claude-state,#{?#{==:#{@claude-state},active},#[bg=terminal]#[fg=colour255]#[bold],#{?#{==:#{@claude-state},thinking},#[bg=terminal]#[fg=colour200]#[bold],#{?#{==:#{@claude-state},question},#[bg=terminal]#[fg=colour128]#[bold]#[blink],#{?#{==:#{@claude-state},waiting},#[bg=terminal]#[fg=colour33]#[bold]#[blink],#{?#{==:#{@claude-state},complete},#[bg=terminal]#[fg=colour48]#[bold],#{?#{==:#{@claude-state},ended},#[bg=terminal]#[fg=colour245],#{?#{==:#{@claude-state},stale},#[bg=terminal]#[fg=colour130],#[bg=terminal]#[fg=colour208]#[bold]}}}}}}},#[bg=terminal]#[fg=colour208]#[bold]} ▶ #I #W #{?#{==:#{@claude-state},thinking},#{@claude-thinking-frame},#{@claude-emoji}}#{@claude-count-display}#[pop-default]'
 
 # Start stale detector if not already running
-STALE_DETECTOR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/claude-stale-detector"
+STALE_DETECTOR="$SCRIPT_DIR/bin/claude-stale-detector"
 if [ -x "$STALE_DETECTOR" ]; then
-    STALE_PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-stale-detector.pid"
-    # Check if already running
+    STALE_PID_FILE="${CLAUDE_TMPDIR}/claude-stale-detector.pid"
     if [ -f "$STALE_PID_FILE" ]; then
-        EXISTING_PID=$(cat "$STALE_PID_FILE" 2>/dev/null | head -1)
-        if [ -n "$EXISTING_PID" ] && kill -0 "$EXISTING_PID" 2>/dev/null; then
-            : # Already running
-        else
+        EXISTING_PID=$(head -1 "$STALE_PID_FILE" 2>/dev/null)
+        if ! { [ -n "$EXISTING_PID" ] && kill -0 "$EXISTING_PID" 2>/dev/null; }; then
             nohup "$STALE_DETECTOR" > /dev/null 2>&1 &
             echo $! > "$STALE_PID_FILE"
         fi

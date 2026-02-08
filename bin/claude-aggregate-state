@@ -3,34 +3,21 @@
 # Usage: claude-aggregate-state <pane_id>
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
 PANE="${1:-$TMUX_PANE}"
 [ -z "$PANE" ] && exit 1
 
-# Get the window containing this pane
-WINDOW=$(tmux display-message -t "$PANE" -p '#{window_id}' 2>/dev/null) || exit 1
-
-# State priority (lower = more urgent)
-state_priority() {
-    case "$1" in
-        waiting)  echo 1 ;;
-        question) echo 2 ;;
-        thinking) echo 3 ;;
-        active)   echo 4 ;;
-        complete) echo 5 ;;
-        stale)    echo 6 ;;
-        ended)    echo 7 ;;
-        *)        echo 99 ;;
-    esac
-}
+WINDOW=$(get_window "$PANE") || exit 1
 
 # Superscript digits for count badge
 superscript() {
-    local n="$1"
     local chars=("" "¹" "²" "³" "⁴" "⁵" "⁶" "⁷" "⁸" "⁹")
-    if [ "$n" -le 9 ] 2>/dev/null; then
-        echo "${chars[$n]}"
+    if [ "$1" -le 9 ] 2>/dev/null; then
+        echo "${chars[$1]}"
     else
-        echo "⁺"  # 10+ panes, just show plus
+        echo "⁺"
     fi
 }
 
@@ -39,14 +26,12 @@ count=0
 worst_priority=99
 worst_state=""
 worst_emoji=""
-has_thinking=false
 latest_timestamp=0
 
 while IFS='|' read -r pane_id pane_state pane_emoji pane_timestamp pane_cmd; do
     [ -z "$pane_state" ] && continue
 
-    # Detect stale pane state: if the pane's current command is a shell,
-    # Claude has exited and the state is leftover. Clear it and skip.
+    # If the pane is running a shell, Claude has exited -- clear leftover state
     case "$pane_cmd" in
         bash|zsh|fish|sh|dash|ksh|tcsh|csh|"")
             tmux set-option -p -t "$pane_id" -u @claude-pane-state 2>/dev/null || true
@@ -57,10 +42,6 @@ while IFS='|' read -r pane_id pane_state pane_emoji pane_timestamp pane_cmd; do
 
     count=$((count + 1))
 
-    if [ "$pane_state" = "thinking" ]; then
-        has_thinking=true
-    fi
-
     priority=$(state_priority "$pane_state")
     if [ "$priority" -lt "$worst_priority" ]; then
         worst_priority=$priority
@@ -69,7 +50,7 @@ while IFS='|' read -r pane_id pane_state pane_emoji pane_timestamp pane_cmd; do
     fi
 
     # Track latest timestamp across all panes
-    if [ -n "$pane_timestamp" ] && [ "$pane_timestamp" -gt "$latest_timestamp" ] 2>/dev/null; then
+    if [ -n "$pane_timestamp" ] && [ "$pane_timestamp" -eq "$pane_timestamp" ] 2>/dev/null && [ "$pane_timestamp" -gt "$latest_timestamp" ]; then
         latest_timestamp="$pane_timestamp"
     fi
 done < <(tmux list-panes -t "$WINDOW" \
@@ -77,10 +58,9 @@ done < <(tmux list-panes -t "$WINDOW" \
 
 # If no Claude panes found, clear window state
 if [ "$count" -eq 0 ]; then
-    tmux set-window-option -t "$WINDOW" -u @claude-state 2>/dev/null || true
-    tmux set-window-option -t "$WINDOW" -u @claude-emoji 2>/dev/null || true
-    tmux set-window-option -t "$WINDOW" -u @claude-count 2>/dev/null || true
-    tmux set-window-option -t "$WINDOW" -u @claude-count-display 2>/dev/null || true
+    for opt in @claude-state @claude-emoji @claude-count @claude-count-display; do
+        tmux set-window-option -t "$WINDOW" -u "$opt" 2>/dev/null || true
+    done
     exit 0
 fi
 
@@ -88,39 +68,33 @@ fi
 tmux set-window-option -t "$WINDOW" @claude-state "$worst_state" 2>/dev/null || true
 tmux set-window-option -t "$WINDOW" @claude-count "$count" 2>/dev/null || true
 
-# Set window-level timestamp (latest across all panes, for stale detection)
 if [ "$latest_timestamp" -gt 0 ] 2>/dev/null; then
     tmux set-window-option -t "$WINDOW" @claude-timestamp "$latest_timestamp" 2>/dev/null || true
 fi
 
-# For thinking state, the emoji comes from @claude-thinking-frame (animated)
-# For other states, set the emoji from the worst-state pane
+# For thinking state, emoji comes from @claude-thinking-frame (animated)
 if [ "$worst_state" != "thinking" ]; then
     tmux set-window-option -t "$WINDOW" @claude-emoji "$worst_emoji" 2>/dev/null || true
 fi
 
-# Set count badge (superscript, only when >1)
+# Count badge (superscript, only when >1)
 if [ "$count" -gt 1 ]; then
     tmux set-window-option -t "$WINDOW" @claude-count-display "$(superscript $count)" 2>/dev/null || true
 else
     tmux set-window-option -t "$WINDOW" -u @claude-count-display 2>/dev/null || true
 fi
 
-# Handle animator lifecycle:
-# If worst state is "thinking", ensure an animator is running for this window.
-# The aggregator sets a flag; the calling hook will check and start animator if needed.
-ANIMATOR_PID_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${WINDOW}.pid"
+# Handle animator lifecycle: flag the hook to start animator if needed
+ANIMATOR_PID_FILE="${CLAUDE_TMPDIR}/claude-animator-${WINDOW}.pid"
 
 if [ "$worst_state" = "thinking" ]; then
-    # Check if animator is already running for this window
+    # Only flag if no animator is already running
     if [ -f "$ANIMATOR_PID_FILE" ]; then
-        EXISTING_PID=$(cat "$ANIMATOR_PID_FILE" 2>/dev/null | head -1)
+        EXISTING_PID=$(head -1 "$ANIMATOR_PID_FILE" 2>/dev/null)
         if [ -n "$EXISTING_PID" ] && kill -0 "$EXISTING_PID" 2>/dev/null; then
-            # Animator already running, nothing to do
             exit 0
         fi
     fi
-    # Need to start animator - set flag so the hook knows
     tmux set-window-option -t "$WINDOW" @claude-needs-animator "on" 2>/dev/null || true
 else
     tmux set-window-option -t "$WINDOW" -u @claude-needs-animator 2>/dev/null || true

@@ -7,76 +7,51 @@
 
 set -euo pipefail
 
-# Get script directory for calling aggregator
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
 
 # Acquire exclusive lock - only one detector globally allowed
-LOCK_FILE="${TMUX_TMPDIR:-/tmp}/claude-stale-detector.lock"
+LOCK_FILE="${CLAUDE_TMPDIR}/claude-stale-detector.lock"
 exec 200>"$LOCK_FILE"
+trap 'exec 200>&-' EXIT INT TERM
 
-# Cleanup: explicitly close lock FD on exit (prevents FD leaks to children)
-cleanup() {
-    exec 200>&-
-}
-trap cleanup EXIT INT TERM
-
-# Non-blocking exclusive lock - exit immediately if another detector holds it
 if ! flock -n 200; then
-    # Another detector is already running
     exit 0
 fi
 
-# We now hold the exclusive lock
-
-# Read stale timeout from tmux option (in seconds), default 5 minutes
+# Read configuration from tmux options
 STALE_TIMEOUT=$(tmux show-option -gqv @claude-stale-timeout 2>/dev/null)
 STALE_TIMEOUT=${STALE_TIMEOUT:-300}
 
-# Read polling interval from tmux option (in seconds), default 30s
 POLL_INTERVAL=$(tmux show-option -gqv @claude-stale-interval 2>/dev/null)
 POLL_INTERVAL=${POLL_INTERVAL:-30}
 
-# Get configured stale emoji (default ⏳)
 STALE_EMOJI=$(tmux show-option -gqv @claude-emoji-stale 2>/dev/null)
 STALE_EMOJI=${STALE_EMOJI:-⏳}
 
-# Main polling loop
 while true; do
-    # Check if plugin still enabled
+    # Exit if plugin disabled
     if [ "$(tmux show -gv @claude-enabled 2>/dev/null)" != "on" ]; then
         exit 0
     fi
 
     now=$(date +%s)
 
-    # Poll all panes with Claude state
     while IFS='|' read -r pane_id pane_state pane_timestamp pane_cmd; do
-        # Skip if no state or no timestamp
-        [ -z "$pane_state" -o -z "$pane_timestamp" ] && continue
+        { [ -z "$pane_state" ] || [ -z "$pane_timestamp" ]; } && continue
 
-        # Skip if already ended or stale
-        [ "$pane_state" = "ended" -o "$pane_state" = "stale" ] && continue
-
-        # Only mark active/complete as stale (thinking/question/waiting are active work)
+        # Only mark active/complete as stale (skip ended, stale, thinking, question, waiting)
         [ "$pane_state" != "active" ] && [ "$pane_state" != "complete" ] && continue
 
-        # Skip if Claude has already exited (pane is running a shell)
+        # Skip if Claude has exited (pane is running a shell)
         case "$pane_cmd" in
-            bash|zsh|fish|sh|dash|ksh|tcsh|csh|"")
-                continue
-                ;;
+            bash|zsh|fish|sh|dash|ksh|tcsh|csh|"") continue ;;
         esac
 
-        # Check if timestamp has expired
         elapsed=$((now - pane_timestamp))
         if [ "$elapsed" -gt "$STALE_TIMEOUT" ]; then
-            # Mark as stale
-            tmux set-option -p -t "$pane_id" @claude-pane-state "stale" 2>/dev/null || true
-            tmux set-option -p -t "$pane_id" @claude-pane-emoji "$STALE_EMOJI" 2>/dev/null || true
-            tmux set-option -p -t "$pane_id" @claude-timestamp "$now" 2>/dev/null || true
-
-            # Re-aggregate window display
-            "$SCRIPT_DIR/bin/claude-aggregate-state" "$pane_id" 2>/dev/null || true
+            set_pane_state "$pane_id" "stale" "$STALE_EMOJI"
+            aggregate_state "$pane_id" 2>/dev/null || true
         fi
     done < <(tmux list-panes -a -F '#{pane_id}|#{@claude-pane-state}|#{@claude-timestamp}|#{pane_current_command}' 2>/dev/null)
 

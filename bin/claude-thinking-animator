@@ -12,40 +12,26 @@ if [ -z "$TARGET" ]; then
     exit 1
 fi
 
-# Determine if target is a window or pane (windows start with @, panes with %)
-# For backward compatibility, if it's a pane, get its window
+# Resolve target to window ID (panes start with %, windows with @)
 if [[ "$TARGET" == %* ]]; then
-    # It's a pane, get the window
     WINDOW=$(tmux display-message -t "$TARGET" -p '#{window_id}' 2>/dev/null) || exit 1
 else
-    # It's already a window
     WINDOW="$TARGET"
 fi
 
-# Acquire exclusive lock - only one animator per window allowed
+# Acquire exclusive lock for this window
 LOCK_FILE="${TMUX_TMPDIR:-/tmp}/claude-animator-${WINDOW}.lock"
 exec 200>"$LOCK_FILE"
+trap 'exec 200>&-' EXIT INT TERM
 
-# Cleanup: explicitly close lock FD on exit (prevents FD leaks to children)
-cleanup() {
-    exec 200>&-
-}
-trap cleanup EXIT INT TERM
-
-# Non-blocking exclusive lock - exit immediately if another animator holds it
 if ! flock -n 200; then
-    # Another animator is already running for this window
     exit 0
 fi
 
-# We now hold the exclusive lock for this window
-
-# Read animation frames from tmux option, fallback to braille spinner
-# Braille characters are all single-width and identical size - no layout bounce
+# Read animation frames from tmux option
 EMOJI_OPTION=$(tmux show-option -gqv @claude-emoji-thinking 2>/dev/null)
 
 if [ -n "$EMOJI_OPTION" ]; then
-    # Split space-separated emoji string into array
     IFS=' ' read -ra FRAMES <<< "$EMOJI_OPTION"
 else
     FRAMES=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
@@ -54,30 +40,18 @@ fi
 FRAME_COUNT=${#FRAMES[@]}
 FRAME_INDEX=0
 
-# Read interval from tmux option (in milliseconds), fallback to 160ms
-DEFAULT_INTERVAL_MS=160
+# Read interval from tmux option (milliseconds), convert to seconds
 INTERVAL_MS=$(tmux show-option -gqv @claude-interval 2>/dev/null)
-INTERVAL_MS=${INTERVAL_MS:-$DEFAULT_INTERVAL_MS}
+INTERVAL_MS=${INTERVAL_MS:-160}
+INTERVAL=$(echo "scale=3; $INTERVAL_MS / 1000" | bc 2>/dev/null || awk "BEGIN {printf \"%.3f\", $INTERVAL_MS / 1000}")
 
-# Convert milliseconds to seconds for sleep command
-INTERVAL=$(echo "scale=3; $INTERVAL_MS / 1000" | bc 2>/dev/null || echo "0.16")
-
-# Keep animating until state changes from "thinking"
 while true; do
-    # Check if state is still "thinking" (window-level aggregate state)
     current_state=$(tmux show-window-option -t "$WINDOW" -v @claude-state 2>/dev/null)
-
     if [ "$current_state" != "thinking" ]; then
-        # Stop animation if state changed
         exit 0
     fi
 
-    # Update the frame in @claude-thinking-frame (window-level)
     tmux set-window-option -t "$WINDOW" @claude-thinking-frame "${FRAMES[$FRAME_INDEX]}"
-
-    # Move to next frame
     FRAME_INDEX=$(( (FRAME_INDEX + 1) % FRAME_COUNT ))
-
-    # Sleep for interval
     sleep "$INTERVAL"
 done

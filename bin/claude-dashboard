@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# Claude Code Dashboard - shows all sessions with state and elapsed time
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
+format_elapsed() {
+    local ts="$1"
+    [ -z "$ts" ] && echo "—" && return
+    local now elapsed
+    now=$(date +%s)
+    elapsed=$((now - ts))
+    if [ "$elapsed" -lt 0 ]; then
+        echo "—"
+    elif [ "$elapsed" -lt 60 ]; then
+        printf "%ds" "$elapsed"
+    elif [ "$elapsed" -lt 3600 ]; then
+        printf "%dm%02ds" "$((elapsed / 60))" "$((elapsed % 60))"
+    else
+        printf "%dh%02dm" "$((elapsed / 3600))" "$((elapsed % 3600 / 60))"
+    fi
+}
+
+state_color() {
+    case "$1" in
+        question) printf "\033[1;35m" ;;
+        waiting)  printf "\033[1;34m" ;;
+        thinking) printf "\033[1;95m" ;;
+        active)   printf "\033[0;37m" ;;
+        complete) printf "\033[1;32m" ;;
+        ended)    printf "\033[0;90m" ;;
+        stale)    printf "\033[0;33m" ;;
+        *)        printf "\033[0;90m" ;;
+    esac
+}
+
+state_label() {
+    case "$1" in
+        question) echo "QUESTION" ;;
+        waiting)  echo "WAITING" ;;
+        thinking) echo "thinking" ;;
+        active)   echo "active" ;;
+        complete) echo "complete" ;;
+        ended)    echo "ended" ;;
+        stale)    echo "stale" ;;
+        *)        echo "—" ;;
+    esac
+}
+
+RESET="\033[0m"
+
+# Determine window listing scope
+ALL_SESSIONS=$(tmux show-option -gqv @claude-dashboard-all-sessions 2>/dev/null)
+if [ "$ALL_SESSIONS" = "on" ]; then
+    LIST_CMD="tmux list-windows -a"
+else
+    LIST_CMD="tmux list-windows"
+fi
+
+# Gather window data
+lines=""
+while IFS='|' read -r idx name state timestamp path; do
+    [ -z "$state" ] && continue
+
+    elapsed=$(format_elapsed "$timestamp")
+    priority=$(state_priority "$state")
+    color=$(state_color "$state")
+    label=$(state_label "$state")
+
+    # Shorten path
+    short_path="${path/#${HOME:-~}/\~}"
+    if [ ${#short_path} -gt 30 ]; then
+        short_path="...${short_path: -27}"
+    fi
+
+    line=$(printf "%s|%s|${color}%3s  %-14s  %-9s  %7s  %s${RESET}" \
+        "$priority" "$idx" "$idx" "$name" "$label" "$elapsed" "$short_path")
+    lines="${lines}${line}\n"
+done < <($LIST_CMD -F '#{window_index}|#{window_name}|#{@claude-state}|#{@claude-timestamp}|#{pane_current_path}' 2>/dev/null)
+
+if [ -z "$lines" ]; then
+    echo "No Claude Code sessions found."
+    sleep 2
+    exit 0
+fi
+
+# Sort by priority (urgent first), then by window index
+sorted=$(printf "%b" "$lines" | sort -t'|' -k1,1n -k2,2n | cut -d'|' -f3-)
+
+header=$(printf "  %3s  %-14s  %-9s  %7s  %s" "#" "Window" "State" "Elapsed" "Directory")
+
+if command -v fzf >/dev/null 2>&1; then
+    selected=$(printf "%b" "$sorted" | fzf \
+        --ansi \
+        --header="$header" \
+        --prompt="Jump to > " \
+        --no-sort \
+        --reverse \
+        --info=hidden \
+        --pointer=">" \
+        --color="header:bold,pointer:200,prompt:200,hl:200,hl+:200" \
+        --bind="q:abort" \
+        --expect="enter" 2>/dev/null) || exit 0
+
+    choice=$(echo "$selected" | tail -1)
+    if [ -n "$choice" ]; then
+        win_idx=$(echo "$choice" | awk 'NF>0 {print $1}')
+        [ -n "$win_idx" ] && tmux select-window -t ":${win_idx}" 2>/dev/null
+    fi
+else
+    echo "$header"
+    echo "  ---  --------------  ---------  -------  --------------------"
+    printf "%b\n" "$sorted"
+    echo ""
+    read -p "Jump to window # (Enter to cancel): " choice
+    if [ -n "$choice" ]; then
+        tmux select-window -t ":${choice}" 2>/dev/null
+    fi
+fi
