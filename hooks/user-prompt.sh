@@ -13,6 +13,9 @@ require_pane
 # Consume hook input (not used)
 cat > /dev/null
 
+# Redirect all output to avoid "hook error" messages in Claude Code
+exec >/dev/null 2>&1
+
 # Set thinking state and update window display
 set_pane_state "$TMUX_PANE" "thinking" "⠹"
 aggregate_state "$TMUX_PANE"

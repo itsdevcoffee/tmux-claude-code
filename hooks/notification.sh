@@ -13,6 +13,9 @@ require_pane
 # Read hook input (JSON from Claude Code)
 hook_input=$(cat)
 
+# Redirect all output to avoid "hook error" messages in Claude Code
+exec >/dev/null 2>&1
+
 # Handle permission_prompt as question state
 if echo "$hook_input" | grep -q '"notification_type":"permission_prompt"'; then
     WINDOW=$(get_window "$TMUX_PANE") || exit 1

@@ -17,6 +17,9 @@ fi
 # Consume hook input (JSON from Claude Code)
 cat > /dev/null
 
+# Redirect all output to avoid "hook error" messages in Claude Code
+exec >/dev/null 2>&1
+
 # Kill all background processes for this window/pane
 WINDOW=$(get_window "$TMUX_PANE") || exit 0
 kill_window_animator "$WINDOW"
